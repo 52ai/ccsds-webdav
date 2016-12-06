@@ -1,0 +1,10 @@
+setup.py
+easywebdav/__init__.py
+easywebdav/__version__.py
+easywebdav/client.py
+easywebdav.egg-info/PKG-INFO
+easywebdav.egg-info/SOURCES.txt
+easywebdav.egg-info/dependency_links.txt
+easywebdav.egg-info/entry_points.txt
+easywebdav.egg-info/requires.txt
+easywebdav.egg-info/top_level.txt
