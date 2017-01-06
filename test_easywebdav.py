@@ -10,7 +10,7 @@ webdav = easywebdav.connect('localhost', username='nssc', password='123456',prot
 #webdav.rmdir('another_dir')
 #webdav.download('remote/path/to/file', 'local/target/file')
 #webdav.upload('local/path/to/file', 'remote/target/file')
-print webdav.ls("/webdav/testFolder")
+print webdav.ls("/webdav/")
 #webdav.mkdir("/webdav/test_mkdir", safe=True)
 webdav.rmdir("/webdav/test_mkdir", safe=True)
 print webdav.exists("/webdav")
