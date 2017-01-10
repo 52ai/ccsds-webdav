@@ -98,6 +98,9 @@
       <height>31</height>
      </rect>
     </property>
+    <property name="text">
+     <string>80</string>
+    </property>
    </widget>
    <widget class="QLineEdit" name="user_edit">
     <property name="geometry">
@@ -153,6 +156,9 @@
       <width>131</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="text">
+     <string>127.0.0.1</string>
     </property>
     <property name="maxLength">
      <number>342764</number>
@@ -226,7 +232,7 @@
      </property>
     </widget>
    </widget>
-   <widget class="QTreeView" name="local_treeView">
+   <widget class="QListView" name="local_listView">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -291,7 +297,7 @@
      </property>
     </widget>
    </widget>
-   <widget class="QTreeView" name="treeView_2">
+   <widget class="QListView" name="remote_listView">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -365,8 +371,6 @@
   <tabstop>pwd_edit</tabstop>
   <tabstop>qc_comb</tabstop>
   <tabstop>qc_btn</tabstop>
-  <tabstop>local_treeView</tabstop>
-  <tabstop>treeView_2</tabstop>
   <tabstop>log_listView</tabstop>
   <tabstop>local_comb</tabstop>
   <tabstop>remote_comb</tabstop>

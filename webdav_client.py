@@ -4,7 +4,7 @@
 import requests
 import platform
 from numbers import Number
-import xml.etree.cElementTree as xml
+import xml.etree.cElementTree as et
 from collections import namedtuple
 import sys
 reload(sys)
@@ -22,11 +22,14 @@ else:
 
 DOWNLOAD_CHUNK_SIZE_BYTES = 1 * 1024 * 1024
 
+
 class WebdavException(Exception):
     pass
 
+
 class ConnectionFailed(WebdavException):
     pass
+
 
 def codestr(code):
     return HTTP_CODES.get(code, 'UNKNOWN')
@@ -53,12 +56,12 @@ def elem2file(elem):
 
 class OperationFailed(WebdavException):
     _OPERATIONS = dict(
-        HEAD = "get header",
-        GET = "download",
-        PUT = "upload",
-        DELETE = "delete",
-        MKCOL = "create directory",
-        PROPFIND = "list directory",
+        HEAD="get header",
+        GET="download",
+        PUT="upload",
+        DELETE="delete",
+        MKCOL="create directory",
+        PROPFIND="list directory",
         )
 
     def __init__(self, method, path, expected_code, actual_code):
@@ -90,7 +93,7 @@ class Client(object):
         if path:
             self.baseurl = '{0}/{1}'.format(self.baseurl, path)
         # 设定当前目录，默认为根目录
-        self.cwd = '/'
+        self.cwd = '/webdav/'
         print"当前目录为："+self.cwd
         # 利用Requests（Python HTTP库）的seession来使用会话对象
         self.session = requests.session()
@@ -117,20 +120,27 @@ class Client(object):
         path = str(path).strip()
         if path.startswith('/'):
             return self.baseurl + path
+        # print self.baseurl
+        # print self.cwd
+        # print path
         return "".join((self.baseurl, self.cwd, path))
 
     def ls(self, remote_path='.'):
-        """实现webdav list命令功能，也就是MULTI_STATUS,状态码207"""
+        """实现webdav PROPFIND方法,也就是list命令功能，也就是MULTI_STATUS,状态码207"""
         headers = {'Depth': '1'}
-        response = self._send('PROPFIND', remote_path, (207, 301), headers=headers)
+        response = self._send('PROPFIND', remote_path, (207, 301), headers=headers)  # 返回一个xml格式的数据
 
         # Redirect
         if response.status_code == 301:
             url = urlparse(response.headers['location'])
             return self.ls(url.path)
-
-        tree = xml.fromstring(response.content)
-        return [elem2file(elem) for elem in tree.findall('{DAV:}response')]
+        print response.content
+        tree = et.fromstring(response.content)
+        # The fromstring() function is the easiest way to parse a string(xml)
+        # fromstring() parses XML from a string directly into an Element, which is the root element of the parsed tree
+        print tree
+        # print tree.findall('{DAV:}response')
+        return [elem2file(elem) for elem in tree.findall('{DAV:}response')]  # 将找到的数据项转为文件
 
     def cd(self, path):
         path = path.strip()
@@ -145,10 +155,13 @@ class Client(object):
             self.cwd += stripped_path
 
     def mkdir(self, path, safe=False):
+        """实现webdav　mkdir命令，亦即创建文件夹的功能"""
         expected_codes = 201 if not safe else (201, 301, 405)
+        # 当safe为True时，如果新创建的目录已存在则不予创建
         self._send('MKCOL', path, expected_codes)
 
     def mkdirs(self, path):
+        """批量创建文件夹"""
         dirs = [d for d in path.split('/') if d]
         if not dirs:
             return
@@ -168,14 +181,17 @@ class Client(object):
             self.cd(old_cwd)
 
     def rmdir(self, path, safe=False):
+        """删除目录"""
         path = str(path).rstrip('/') + '/'
         expected_codes = 204 if not safe else (204, 404)
         self._send('DELETE', path, expected_codes)
 
     def delete(self, path):
-        self._send('DELETE', path, 204)
+        """删除文件"""
+        self._send('DELETE', path, 204)  # 204表示NO_CONTENT,删除之后期待返回的HTTP_CODES为204
 
     def upload(self, local_path_or_fileobj, remote_path):
+        """上传文件"""
         if isinstance(local_path_or_fileobj, basestring):
             with open(local_path_or_fileobj, 'rb') as f:
                 self._upload(f, remote_path)
@@ -186,6 +202,7 @@ class Client(object):
         self._send('PUT', remote_path, (200, 201, 204), data=fileobj)
 
     def download(self, remote_path, local_path_or_fileobj):
+        """下载文件"""
         response = self._send('GET', remote_path, 200, stream=True)
         if isinstance(local_path_or_fileobj, basestring):
             with open(local_path_or_fileobj, 'wb') as f:
@@ -198,5 +215,6 @@ class Client(object):
             fileobj.write(chunk)
 
     def exists(self, remote_path):
+        """判断文件是否存在"""
         response = self._send('HEAD', remote_path, (200, 301, 404))
         return True if response.status_code != 404 else False
