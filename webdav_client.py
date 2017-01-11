@@ -16,9 +16,11 @@ py_majversion, py_minversion, py_revversion = platform.python_version_tuple()
 if py_majversion == '2':
     from httplib import responses as HTTP_CODES
     from urlparse import urlparse
+    from urllib import unquote
 else:
     from http.client import responses as HTTP_CODES
     from urllib.parse import urlparse
+    from urllib import unquote
 
 DOWNLOAD_CHUNK_SIZE_BYTES = 1 * 1024 * 1024
 
@@ -41,7 +43,7 @@ File = namedtuple('File', ['name', 'size', 'mtime', 'ctime', 'contenttype'])  # 
 
 def prop(elem, name, default=None):
     child = elem.find('.//{DAV:}' + name)
-    return default if child is None else child.text
+    return default if child is None else unquote(child.text)
 
 
 def elem2file(elem):
@@ -110,10 +112,16 @@ class Client(object):
 
     def _send(self, method, path, expected_code, **kwargs):
         url = self._get_url(path)
-        response = self.session.request(method, url, allow_redirects=False, **kwargs)
+        response = self.session.request(method, url, allow_redirects=False, **kwargs)   # 关键性语句！！！
+        # help(self.session)
+        help(response)
+        print "status_code:", response.status_code
+        print "headers:", response.headers
+        # print "content:", response.content
+        print "request:", response.request
         if isinstance(expected_code, Number) and response.status_code != expected_code \
             or not isinstance(expected_code, Number) and response.status_code not in expected_code:
-            raise OperationFailed(method, path, expected_code, response.status_code)
+            raise OperationFailed(method, path, expected_code, response.status_code)  # status_code 为状态响应码
         return response
 
     def _get_url(self, path):
@@ -134,7 +142,7 @@ class Client(object):
         if response.status_code == 301:
             url = urlparse(response.headers['location'])
             return self.ls(url.path)
-        print response.content
+        # print response.content
         tree = et.fromstring(response.content)
         # The fromstring() function is the easiest way to parse a string(xml)
         # fromstring() parses XML from a string directly into an Element, which is the root element of the parsed tree

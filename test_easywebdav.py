@@ -14,7 +14,10 @@ webdav.upload('local/path/to/file', 'remote/target/file')
 """
 
 # webdav.cd("/webdav/") # 在webdav客户端类中初始化了当前目录为/webdav/所以不需要cd进去
+
 print webdav.ls()
+for i in webdav.ls():
+    print i.name
 # webdav.cd("/webdav/testFolder/")
 # print webdav.ls()
 # webdav.mkdir("/webdav/test_mkdir", safe=True) # 新建一个目录
