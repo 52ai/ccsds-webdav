@@ -44,7 +44,6 @@ class MainDlg(QDialog, ui_webdav2ccsds.Ui_ccsds_dialog):
             # print f
             self.add_item_to_local(f)
 
-
     def add_item_to_log(self, item):
         """往底部的log_listView中添加信息"""
         print item
