@@ -96,7 +96,7 @@ class Client(object):
             self.baseurl = '{0}/{1}'.format(self.baseurl, path)
         # 设定当前目录，默认为根目录
         self.cwd = '/webdav/'
-        print"当前目录为："+self.cwd
+        # print"当前目录为："+self.cwd
         # 利用Requests（Python HTTP库）的seession来使用会话对象
         self.session = requests.session()
         self.session.verify = verify_ssl  # 为HTTPS请求验证SSL证书
